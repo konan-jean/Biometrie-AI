@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Base biométrique locale
+backend/bioproof.db
+
+# Photos et données biométriques
+backend/uploads/
+backend/proofs/
+backend/restored/
+
+# Secrets
+.env
+*.env
+
+# VS Code / Windows
+.vscode/
+Thumbs.db
+Desktop.ini

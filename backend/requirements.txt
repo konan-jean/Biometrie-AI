@@ -1,0 +1,12 @@
+# Backend BioProof AI
+# Installation minimale recommandée :
+Pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Optionnel : YOLOv8 pour la détection personne/zone utile
+ultralytics>=8.0.0
+
+# Optionnel : reconnaissance faciale plus avancée.
+# Peut nécessiter CMake/dlib et Python 3.10/3.11 selon Windows.
+# face-recognition>=1.3.0

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Système intelligent de preuve de présence biométrique anti-fraude" />
+  <title>BioProof AI | Présence biométrique anti-fraude</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/forms.css" />
+  <link rel="stylesheet" href="assets/css/scanner.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <div class="brand">
+        <div class="brand-mark">BP</div>
+        <div>
+          <strong>BioProof AI</strong>
+          <span>Contrôle biométrique</span>
+        </div>
+      </div>
+
+      <nav class="main-nav" id="mainNav">
+        <button class="nav-item active" data-page="dashboard" type="button"><span>⌁</span> Tableau de bord</button>
+        <button class="nav-item" data-page="register" type="button"><span>＋</span> Enregistrement</button>
+        <button class="nav-item" data-page="scanner" type="button"><span>◉</span> Scanner robuste</button>
+        <button class="nav-item" data-page="yolo" type="button"><span>◈</span> Détection YOLOv8</button>
+        <button class="nav-item" data-page="persons" type="button"><span>👤</span> Personnes</button>
+        <button class="nav-item" data-page="admin" type="button"><span>🛡</span> Espace admin</button>
+        <button class="nav-item" data-page="history" type="button"><span>▤</span> Historique</button>
+        <button class="nav-item" data-page="settings" type="button"><span>⚙</span> Paramètres</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <p class="eyebrow">Statut système</p>
+        <div class="status-line">
+          <span class="status-dot" id="backendDot"></span>
+          <span id="backendStatus">Vérification...</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Ouvrir le menu">☰</button>
+        <div>
+          <p class="eyebrow" id="pageEyebrow">Système intelligent</p>
+          <h1 id="pageTitle">Tableau de bord</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="clock" id="clock">--:--:--</span>
+          <button class="btn btn-ghost" id="themeToggle" type="button">Mode sombre</button>
+        </div>
+      </header>
+
+      <section id="toastArea" class="toast-area" aria-live="polite"></section>
+
+      <section class="page active" id="page-dashboard" aria-label="Tableau de bord">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">Preuve de présence biométrique anti-fraude</p>
+            <h2>Surveillez les présences, sécurisez les accès et détectez les tentatives suspectes.</h2>
+            <p>Interface professionnelle pour enregistrer les profils, scanner les visages, mesurer la fiabilité et conserver un historique horodaté.</p>
+          </div>
+          <button class="btn btn-primary" data-go="scanner" type="button">Lancer un scan</button>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card"><span>Personnes enregistrées</span><strong id="statPersons">0</strong><small>Profils biométriques</small></article>
+          <article class="stat-card"><span>Scans effectués</span><strong id="statScans">0</strong><small>Historique local</small></article>
+          <article class="stat-card success"><span>Présences validées</span><strong id="statValid">0</strong><small>Décisions acceptées</small></article>
+          <article class="stat-card warning"><span>Cas incertains</span><strong id="statUncertain">0</strong><small>Vérification humaine</small></article>
+          <article class="stat-card danger"><span>Tentatives suspectes</span><strong id="statSuspect">0</strong><small>Risque de fraude</small></article>
+          <article class="stat-card"><span>Fiabilité moyenne</span><strong id="statReliability">0%</strong><small>Score global</small></article>
+        </div>
+
+        <div class="content-grid two-columns">
+          <article class="panel">
+            <div class="panel-header">
+              <h3>Derniers scans</h3>
+              <button class="btn btn-small btn-ghost" data-go="history" type="button">Voir tout</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Heure</th><th>Identité</th><th>Décision</th><th>Fiabilité</th></tr></thead>
+                <tbody id="recentScans"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h3>Répartition des décisions</h3></div>
+            <div class="decision-stack" id="decisionStack"></div>
+          </article>
+        </div>
+      </section>
+      <!--bouton de Detection yolov8-->
+
+
+      <section class="page" id="page-register" aria-label="Enregistrement">
+        <div class="section-intro">
+          <div>
+            <p class="eyebrow">Création profil</p>
+            <h2>Enregistrement biométrique</h2>
+            <p>Ajoutez une personne avec ses informations et une photo nette du visage.</p>
+          </div>
+        </div>
+
+        <div class="content-grid form-layout">
+          <form class="panel form-card" id="registerForm">
+            <div class="form-grid">
+              <label>Nom <input name="last_name" required placeholder="Ex. Konan" /></label>
+              <label>Prénom <input name="first_name" required placeholder="Ex. Jean" /></label>
+              <label>Matricule <input name="matricule" required placeholder="Ex. INF-2026-001" /></label>
+              <label>Fonction <input name="role" placeholder="Ex. Étudiant" /></label>
+              <label>Département <input name="department" placeholder="Ex. Informatique" /></label>
+              <label>Contact <input name="contact" placeholder="Téléphone ou email" /></label>
+              <label>Statut
+                <select name="status" required>
+                  <option value="Actif">Actif</option>
+                  <option value="Inactif">Inactif</option>
+                  <option value="Visiteur">Visiteur</option>
+                  <option value="Personnel">Personnel</option>
+                  <option value="Étudiant">Étudiant</option>
+                  <option value="Agent externe">Agent externe</option>
+                </select>
+              </label>
+              <label>Photo visage <input id="photoInput" name="photo" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" required /></label>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Enregistrer le profil</button>
+              <button class="btn btn-ghost" type="reset">Réinitialiser</button>
+            </div>
+          </form>
+
+          <aside class="panel preview-card">
+            <div class="photo-preview" id="photoPreview">
+              <span>Aperçu photo</span>
+            </div>
+            <div id="registerResult" class="result-box muted">
+              Le résultat de l’enregistrement apparaîtra ici.
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-scanner" aria-label="Scanner robuste">
+        <div class="section-intro">
+          <div>
+            <p class="eyebrow">Scan temps réel</p>
+            <h2>Scanner robuste</h2>
+            <p>Placez un seul visage dans le cadre : le système capture et analyse automatiquement toutes les 5 secondes.</p>
+          </div>
+        </div>
+
+        <div class="scanner-layout">
+          <article class="panel webcam-panel">
+            <div class="camera-shell">
+              <video id="webcam" autoplay playsinline muted></video>
+              <canvas id="captureCanvas" hidden></canvas>
+              <div class="scan-frame"><span></span></div>
+            </div>
+            <div class="scanner-actions">
+              <button class="btn btn-primary" id="startCamera" type="button">Démarrer webcam</button>
+              <button class="btn btn-secondary" id="captureBtn" type="button">Capturer</button>
+              <button class="btn btn-danger" id="stopCamera" type="button">Arrêter</button>
+              <button class="btn btn-primary glow" id="analyzeBtn" type="button">Analyser robuste</button>
+              <button class="btn btn-ghost active" id="autoScanBtn" type="button">Scan auto ON</button>
+            </div>
+            <div class="auto-scan-status" id="autoScanStatus">Démarrez la webcam : le système capture et analyse automatiquement toutes les 5 secondes.</div>
+            <div class="precheck-panel" id="precheckPanel">
+              <div><strong>Précontrôle intelligent</strong><span>Le précontrôle informe le résultat mais ne bloque pas le scan automatique.</span></div>
+            </div>
+            <p class="hint">Conseil : visage proche, lumière devant vous, aucun autre visage dans l’image.</p>
+          </article>
+
+          <article class="panel result-panel">
+            <div class="panel-header">
+              <h3>Résultat biométrique</h3>
+              <span class="badge neutral" id="decisionBadge">En attente</span>
+            </div>
+            <div id="scanResult" class="empty-state">
+              Aucun scan analysé. Démarrez la webcam : le système capturera et analysera automatiquement après 5 secondes.
+            </div>
+          </article>
+        </div>
+      </section>
+
+            <!-- =====================================================
+           DÉTECTION D'OBJETS YOLOv8
+      ====================================================== -->
+      <section class="page" id="page-yolo" aria-label="Détection YOLOv8">
+
+        <div class="section-intro">
+          <div>
+            <p class="eyebrow">Vision artificielle</p>
+            <h2>Détection d'objets YOLOv8</h2>
+            <p>
+              Utilisez la webcam pour détecter et identifier en temps réel
+              les objets reconnus par le modèle YOLOv8.
+            </p>
+          </div>
+        </div>
+
+        <div class="scanner-layout">
+
+          <!-- CAMÉRA YOLO -->
+          <article class="panel webcam-panel">
+
+            <div class="panel-header">
+              <div>
+                <h3>Caméra intelligente</h3>
+                <p class="muted">
+                  Détection et classification en temps réel
+                </p>
+              </div>
+
+              <span class="badge neutral" id="yoloBadge">
+                Arrêté
+              </span>
+            </div>
+
+            <div class="camera-shell" id="yoloCameraShell">
+
+              <div id="yoloPlaceholder" class="empty-state">
+                <div>
+                  <strong>YOLOv8</strong>
+                  <p>
+                    Cliquez sur « Démarrer YOLOv8 » pour lancer
+                    la détection.
+                  </p>
+                </div>
+              </div>
+
+              <img
+                id="yoloStream"
+                alt="Flux vidéo YOLOv8"
+                style="
+                  display:none;
+                  width:100%;
+                  height:100%;
+                  object-fit:contain;
+                "
+              />
+
+            </div>
+
+            <div class="scanner-actions">
+
+              <button
+                class="btn btn-primary glow"
+                id="startYoloBtn"
+                type="button"
+              >
+                ▶ Démarrer YOLOv8
+              </button>
+
+              <button
+                class="btn btn-danger"
+                id="stopYoloBtn"
+                type="button"
+                disabled
+              >
+                ■ Arrêter
+              </button>
+
+            </div>
+
+            <div
+              class="auto-scan-status"
+              id="yoloStatus"
+            >
+              YOLOv8 est prêt. Démarrez la détection.
+            </div>
+
+            <p class="hint">
+              Présentez un objet devant la caméra. Le modèle affichera
+              sa classe et son niveau de confiance lorsqu'il le reconnaît.
+            </p>
+
+          </article>
+
+
+          <!-- INFORMATIONS -->
+          <article class="panel result-panel">
+
+            <div class="panel-header">
+
+              <h3>Informations YOLOv8</h3>
+
+              <span
+                class="badge neutral"
+                id="yoloModelBadge"
+              >
+                YOLOv8n
+              </span>
+
+            </div>
+
+            <div class="empty-state" id="yoloInfo">
+
+              <div>
+                <p>
+                  <strong>Modèle :</strong>
+                  YOLOv8n
+                </p>
+
+                <p>
+                  <strong>Source :</strong>
+                  Webcam
+                </p>
+
+                <p>
+                  <strong>Mode :</strong>
+                  Détection temps réel
+                </p>
+
+                <p>
+                  <strong>Seuil de confiance :</strong>
+                  35 %
+                </p>
+
+                <p>
+                  <strong>Backend :</strong>
+                  <span id="yoloBackendState">
+                    Vérification...
+                  </span>
+                </p>
+              </div>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+      <section class="page" id="page-persons" aria-label="Personnes enregistrées">
+        <div class="section-intro"><div><p class="eyebrow">Base locale</p><h2>Personnes enregistrées</h2><p>Consultez, filtrez et contrôlez les profils biométriques.</p></div></div>
+        <article class="panel">
+          <div class="toolbar">
+            <input class="search-input" id="personSearch" placeholder="Rechercher par nom, matricule ou département" />
+            <button class="btn btn-ghost" id="refreshPersons" type="button">Actualiser</button>
+          </div>
+          <div class="cards-grid" id="personsGrid"></div>
+        </article>
+      </section>
+
+
+      <section class="page" id="page-admin" aria-label="Espace administrateur">
+        <div class="section-intro admin-hero">
+          <div>
+            <p class="eyebrow">Administration sécurisée</p>
+            <h2>Espace admin — gestion des enregistrements</h2>
+            <p>Contrôlez les profils biométriques, vérifiez les doublons, modifiez les informations et supprimez les enregistrements non valides.</p>
+          </div>
+          <div class="admin-lock-card">
+            <span class="admin-lock-icon">🛡</span>
+            <strong>Contrôle local</strong>
+            <small>Accès réservé à l’administrateur du système</small>
+          </div>
+        </div>
+
+        <div class="admin-login panel" id="adminLoginPanel">
+          <div>
+            <p class="eyebrow">Authentification</p>
+            <h3>Connexion administrateur</h3>
+            <p class="muted">Cette protection locale empêche l’accès direct aux fonctions sensibles depuis l’interface.</p>
+          </div>
+          <form id="adminLoginForm" class="admin-login-form">
+            <label>Identifiant
+              <input name="username" placeholder="admin" autocomplete="username" required />
+            </label>
+            <label>Mot de passe
+              <input name="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            </label>
+            <button class="btn btn-primary" type="submit">Ouvrir l’espace admin</button>
+            <p class="hint">Identifiants par défaut pour le prototype : <strong>admin</strong> / <strong>admin123</strong>. À remplacer dans une version réelle.</p>
+          </form>
+        </div>
+
+        <div class="admin-workspace" id="adminWorkspace" hidden>
+          <div class="admin-topbar panel">
+            <div>
+              <p class="eyebrow">Session active</p>
+              <h3>Gestion professionnelle des profils</h3>
+            </div>
+            <div class="admin-actions-inline">
+              <button class="btn btn-ghost" id="adminRefresh" type="button">Actualiser</button>
+              <button class="btn btn-secondary" id="adminExportCsv" type="button">Exporter CSV</button>
+              <button class="btn btn-danger" id="adminLogout" type="button">Fermer la session</button>
+            </div>
+          </div>
+
+          <div class="admin-tabs" role="tablist" aria-label="Sections administration">
+            <button class="admin-tab active" data-admin-tab="profiles" type="button">Profils biométriques</button>
+            <button class="admin-tab" data-admin-tab="history" type="button">Historique des scans</button>
+            <button class="admin-tab" data-admin-tab="settings" type="button">Paramètres système</button>
+          </div>
+
+          <div class="stats-grid admin-stats">
+            <article class="stat-card"><span>Total profils</span><strong id="adminTotalPersons">0</strong><small>enregistrements biométriques</small></article>
+            <article class="stat-card"><span>Actifs</span><strong id="adminActivePersons">0</strong><small>profils autorisés</small></article>
+            <article class="stat-card"><span>Visiteurs</span><strong id="adminVisitors">0</strong><small>accès temporaire</small></article>
+            <article class="stat-card"><span>Qualité moyenne</span><strong id="adminAvgQuality">0%</strong><small>photos de référence</small></article>
+          </div>
+
+          <div class="admin-tab-page active" id="adminTab-profiles">
+          <article class="panel admin-panel">
+            <div class="panel-header admin-panel-header">
+              <div>
+                <h3>Registre des personnes enregistrées</h3>
+                <p class="muted">Recherche, filtrage, modification et suppression des profils.</p>
+              </div>
+              <span class="badge neutral" id="adminCountBadge">0 profils</span>
+            </div>
+            <div class="toolbar admin-toolbar">
+              <input class="search-input" id="adminSearch" placeholder="Rechercher nom, matricule, département, statut" />
+              <select id="adminStatusFilter">
+                <option value="all">Tous les statuts</option>
+                <option value="Actif">Actif</option>
+                <option value="Inactif">Inactif</option>
+                <option value="Visiteur">Visiteur</option>
+                <option value="Personnel">Personnel</option>
+                <option value="Étudiant">Étudiant</option>
+                <option value="Agent externe">Agent externe</option>
+              </select>
+              <button class="btn btn-danger" id="adminDeleteSelected" type="button">Supprimer sélection</button>
+            </div>
+            <div class="table-wrap admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th><input type="checkbox" id="adminSelectAll" aria-label="Tout sélectionner" /></th>
+                    <th>Identité</th>
+                    <th>Matricule</th>
+                    <th>Département</th>
+                    <th>Statut</th>
+                    <th>Qualité</th>
+                    <th>Créé le</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminPersonsTable"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel admin-audit-panel">
+            <div class="panel-header"><h3>Journal administratif</h3><button class="btn btn-small btn-ghost" id="adminLoadAudit" type="button">Charger le journal</button></div>
+            <div id="adminAuditList" class="audit-list empty-state">Aucun journal chargé.</div>
+          </article>
+          </div>
+
+          <div class="admin-tab-page" id="adminTab-history">
+            <article class="panel admin-panel">
+              <div class="panel-header admin-panel-header">
+                <div>
+                  <h3>Historique administratif des scans</h3>
+                  <p class="muted">Contrôlez les preuves de présence, les décisions incertaines et les tentatives suspectes.</p>
+                </div>
+                <span class="badge neutral" id="adminHistoryCount">0 scans</span>
+              </div>
+              <div class="stats-grid admin-history-stats">
+                <article class="stat-card success"><span>Validées</span><strong id="adminHistValid">0</strong><small>présences acceptées</small></article>
+                <article class="stat-card warning"><span>Incertaines</span><strong id="adminHistUncertain">0</strong><small>vérification humaine</small></article>
+                <article class="stat-card danger"><span>Suspectes</span><strong id="adminHistSuspect">0</strong><small>risque de fraude</small></article>
+                <article class="stat-card"><span>Fiabilité moyenne</span><strong id="adminHistAvgReliability">0%</strong><small>historique récent</small></article>
+              </div>
+              <div class="toolbar admin-toolbar">
+                <input class="search-input" id="adminHistorySearch" placeholder="Rechercher identité, matricule, décision, preuve" />
+                <select id="adminHistoryDecisionFilter">
+                  <option value="all">Toutes les décisions</option>
+                  <option value="validée">Présence validée</option>
+                  <option value="incertaine">Présence incertaine</option>
+                  <option value="refusée">Présence refusée</option>
+                  <option value="suspecte">Tentative suspecte</option>
+                </select>
+                <button class="btn btn-ghost" id="adminHistoryRefresh" type="button">Actualiser</button>
+                <button class="btn btn-secondary" id="adminHistoryExport" type="button">Exporter CSV</button>
+                <button class="btn btn-danger" id="adminHistoryClear" type="button">Vider l’historique</button>
+              </div>
+              <div class="table-wrap admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr><th>Date</th><th>Heure</th><th>Identité</th><th>Matricule</th><th>Décision</th><th>Facial</th><th>Fiabilité</th><th>Preuve</th><th>Action</th></tr>
+                  </thead>
+                  <tbody id="adminHistoryTable"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="admin-tab-page" id="adminTab-settings">
+            <article class="panel admin-panel">
+              <div class="panel-header admin-panel-header">
+                <div>
+                  <h3>Paramètres professionnels du système</h3>
+                  <p class="muted">Réglez les seuils biométriques, le scan automatique, la conservation et le mode de décision.</p>
+                </div>
+                <span class="badge neutral">Configuration</span>
+              </div>
+              <form id="adminSettingsForm" class="settings-form admin-settings-grid">
+                <label>URL API backend <input name="apiBase" value="http://localhost:8000" /></label>
+                <label>Intervalle scan automatique, secondes <input name="autoScanInterval" type="number" min="3" max="60" value="5" /></label>
+                <label>Seuil reconnaissance faciale (%) <input name="faceThreshold" type="number" min="0" max="100" value="85" /></label>
+                <label>Seuil fiabilité globale (%) <input name="reliabilityThreshold" type="number" min="0" max="100" value="85" /></label>
+                <label>Seuil vivacité anti-fraude (%) <input name="livenessThreshold" type="number" min="0" max="100" value="40" /></label>
+                <label>Seuil qualité image (%) <input name="qualityThreshold" type="number" min="0" max="100" value="55" /></label>
+                <label>Conservation historique, jours <input name="retentionDays" type="number" min="1" max="3650" value="180" /></label>
+                <label>Taille max image, Mo <input name="maxImageMb" type="number" min="1" max="25" value="8" /></label>
+                <label>Mode de décision
+                  <select name="decisionMode">
+                    <option value="hybride">Hybride : scan fluide + validation stricte</option>
+                    <option value="strict">Strict : sécurité maximale</option>
+                    <option value="demo">Démonstration : tolérance élevée</option>
+                  </select>
+                </label>
+                <label><input name="demoMode" type="checkbox" checked /> Activer le mode démonstration si le backend est absent</label>
+                <label><input name="autoScanEnabled" type="checkbox" checked /> Activer le scan automatique par défaut</label>
+                <label><input name="storeProofImages" type="checkbox" checked /> Enregistrer les images de preuve</label>
+                <div class="settings-actions">
+                  <button class="btn btn-primary" type="submit">Sauvegarder les paramètres</button>
+                  <button class="btn btn-ghost" id="adminSettingsReset" type="button">Réinitialiser</button>
+                  <button class="btn btn-secondary" id="adminSettingsSync" type="button">Synchroniser backend</button>
+                </div>
+              </form>
+            </article>
+          </div>
+        </div>
+
+        <div class="modal-backdrop" id="adminEditModal" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="adminEditTitle">
+            <div class="modal-header">
+              <div><p class="eyebrow">Modification profil</p><h3 id="adminEditTitle">Modifier l’enregistrement</h3></div>
+              <button class="modal-close" id="adminCloseModal" type="button" aria-label="Fermer">×</button>
+            </div>
+            <form id="adminEditForm" class="form-grid admin-edit-form">
+              <input name="id" type="hidden" />
+              <label>Nom <input name="last_name" required /></label>
+              <label>Prénom <input name="first_name" required /></label>
+              <label>Matricule <input name="matricule" required /></label>
+              <label>Fonction <input name="role" /></label>
+              <label>Département <input name="department" /></label>
+              <label>Contact <input name="contact" /></label>
+              <label>Statut
+                <select name="status" required>
+                  <option value="Actif">Actif</option>
+                  <option value="Inactif">Inactif</option>
+                  <option value="Visiteur">Visiteur</option>
+                  <option value="Personnel">Personnel</option>
+                  <option value="Étudiant">Étudiant</option>
+                  <option value="Agent externe">Agent externe</option>
+                </select>
+              </label>
+              <div class="modal-actions">
+                <button class="btn btn-primary" type="submit">Sauvegarder</button>
+                <button class="btn btn-ghost" id="adminCancelEdit" type="button">Annuler</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history" aria-label="Historique">
+        <div class="section-intro"><div><p class="eyebrow">Traçabilité</p><h2>Historique des scans</h2><p>Consultez les présences validées, refusées, incertaines et suspectes.</p></div></div>
+        <article class="panel">
+          <div class="toolbar">
+            <input class="search-input" id="historySearch" placeholder="Rechercher dans l’historique" />
+            <select id="decisionFilter"><option value="all">Toutes les décisions</option><option value="validée">Validée</option><option value="incertaine">Incertaine</option><option value="refusée">Refusée</option><option value="suspecte">Suspecte</option></select>
+            <button class="btn btn-ghost" id="exportCsv" type="button">Exporter CSV</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Heure</th><th>Identité</th><th>Décision</th><th>Facial</th><th>Fiabilité</th><th>Preuve</th></tr></thead>
+              <tbody id="historyTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="page" id="page-settings" aria-label="Paramètres">
+        <div class="section-intro"><div><p class="eyebrow">Configuration</p><h2>Paramètres du système</h2><p>Définissez les seuils et l’adresse de l’API backend.</p></div></div>
+        <form class="panel settings-form" id="settingsForm">
+          <label>URL API backend <input name="apiBase" value="http://localhost:8000" /></label>
+          <label>Seuil reconnaissance faciale (%) <input name="faceThreshold" type="number" min="0" max="100" value="85" /></label>
+          <label>Seuil fiabilité globale (%) <input name="reliabilityThreshold" type="number" min="0" max="100" value="85" /></label>
+          <label>Seuil vivacité (%) <input name="livenessThreshold" type="number" min="0" max="100" value="40" /></label>
+          <label><input name="demoMode" type="checkbox" checked /> Activer le mode démonstration si le backend est absent</label>
+          <button class="btn btn-primary" type="submit">Sauvegarder les paramètres</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/utils.js?v=autoscan5"></script>
+  <script src="assets/js/api.js?v=autoscan5"></script>
+  <script src="assets/js/webcam.js?v=autoscan5"></script>
+  <script src="assets/js/register.js?v=autoscan5"></script>
+  <script src="assets/js/scanner.js?v=autoscan-direct-5s"></script>
+  <script src="assets/js/yolo.js?v=1"></script>
+  <script src="assets/js/persons.js?v=autoscan5"></script>
+  <script src="assets/js/history.js?v=autoscan5"></script>
+  <script src="assets/js/admin.js?v=admin-history-settings-v2"></script>
+  <script src="assets/js/app.js?v=admin-history-settings-v2"></script>
+</body>
+</html>

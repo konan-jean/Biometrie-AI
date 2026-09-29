@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    BioProof AI | Détection YOLOv8
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Inter,
+        Arial,
+        sans-serif;
+
+    background: #020817;
+
+    color: #f8fafc;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 230px;
+    height: 100vh;
+
+    padding: 20px 14px;
+
+    background: #101827;
+
+    border-right:
+        1px solid #1e293b;
+}
+
+
+.logo {
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    margin-bottom: 35px;
+}
+
+
+.logo small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    color: #94a3b8;
+}
+
+
+.menu-item {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    margin-bottom: 5px;
+
+    border-radius: 9px;
+
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    font-size: 14px;
+}
+
+
+.menu-item:hover {
+
+    background: #1e293b;
+
+    color: white;
+}
+
+
+.menu-item.active {
+
+    background: #1e293b;
+
+    color: #60a5fa;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.main {
+
+    margin-left: 230px;
+
+    min-height: 100vh;
+
+    padding: 30px;
+}
+
+
+.eyebrow {
+
+    color: #3b82f6;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+h1 {
+
+    margin:
+        7px 0 5px;
+
+    font-size: 25px;
+}
+
+
+.subtitle {
+
+    margin-bottom: 25px;
+
+    color: #94a3b8;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+
+    padding: 22px;
+
+    border:
+        1px solid #1e293b;
+
+    border-radius: 16px;
+
+    background: #0f172a;
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+.camera {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    min-height: 570px;
+
+    overflow: hidden;
+
+    background: #020617;
+
+    border:
+        1px solid #25334d;
+
+    border-radius: 14px;
+}
+
+
+.camera img {
+
+    display: none;
+
+    width: 100%;
+
+    max-height: 720px;
+
+    object-fit: contain;
+}
+
+
+.placeholder {
+
+    text-align: center;
+
+    color: #64748b;
+}
+
+
+.placeholder-icon {
+
+    margin-bottom: 15px;
+
+    font-size: 55px;
+}
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 18px;
+
+    flex-wrap: wrap;
+}
+
+
+button {
+
+    padding:
+        12px 20px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+}
+
+
+.start {
+
+    background: #2563eb;
+
+    color: white;
+}
+
+
+.stop {
+
+    background: #263348;
+
+    color: white;
+}
+
+
+label {
+
+    margin-left: auto;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+input[type="range"] {
+
+    width: 160px;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status-bar {
+
+    display: flex;
+
+    gap: 25px;
+
+    margin-top: 18px;
+
+    padding: 15px;
+
+    background: #111c30;
+
+    border-radius: 10px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+.status-value {
+
+    color: white;
+
+    font-weight: 700;
+}
+
+
+.online {
+
+    color: #22c55e;
+}
+
+
+.offline {
+
+    color: #94a3b8;
+}
+
+
+/* =========================
+   INFORMATION
+========================= */
+
+.info {
+
+    margin-top: 20px;
+
+    padding: 17px;
+
+    background: #0b1425;
+
+    border:
+        1px solid #1e293b;
+
+    border-radius: 10px;
+}
+
+
+.info h3 {
+
+    margin-top: 0;
+}
+
+
+.info p {
+
+    margin-bottom: 0;
+
+    color: #94a3b8;
+
+    line-height: 1.6;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ======================
+     SIDEBAR
+====================== -->
+
+<aside class="sidebar">
+
+<div class="logo">
+
+    ◉ BioProof AI
+
+    <small>
+        Contrôle biométrique
+    </small>
+
+</div>
+
+
+<a
+    href="../index.html"
+    class="menu-item"
+>
+    ⌂ Tableau de bord
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ＋ Enregistrement
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ◎ Scanner robuste
+</a>
+
+
+<a
+    href="yolo.html"
+    class="menu-item active"
+>
+    ◈ Détection YOLOv8
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ♟ Personnes
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ♢ Espace admin
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ▤ Historique
+</a>
+
+
+<a
+    href="#"
+    class="menu-item"
+>
+    ⚙ Paramètres
+</a>
+
+</aside>
+
+
+
+<!-- ======================
+     MAIN
+====================== -->
+
+<main class="main">
+
+
+<div class="eyebrow">
+
+    VISION ARTIFICIELLE
+
+</div>
+
+
+<h1>
+
+    Détection intelligente d'objets
+
+</h1>
+
+
+<div class="subtitle">
+
+    Détection, localisation et classification
+    d'objets en temps réel avec YOLOv8.
+
+</div>
+
+
+
+<div class="card">
+
+
+<div class="camera">
+
+
+    <div
+        id="placeholder"
+        class="placeholder"
+    >
+
+        <div class="placeholder-icon">
+            ◉
+        </div>
+
+        <h2>
+            Caméra inactive
+        </h2>
+
+        <p>
+            Démarrez YOLOv8 pour analyser
+            le flux vidéo.
+        </p>
+
+    </div>
+
+
+    <img
+        id="yoloStream"
+        alt="Flux YOLOv8"
+    >
+
+
+</div>
+
+
+
+<div class="controls">
+
+
+<button
+    class="start"
+    onclick="startYOLO()"
+>
+
+    ▶ Démarrer la détection
+
+</button>
+
+
+<button
+    class="stop"
+    onclick="stopYOLO()"
+>
+
+    ■ Arrêter
+
+</button>
+
+
+<label>
+
+    Seuil :
+
+    <strong id="confidenceText">
+        35 %
+    </strong>
+
+</label>
+
+
+<input
+    id="confidence"
+    type="range"
+    min="10"
+    max="90"
+    value="35"
+    oninput="updateConfidence()"
+>
+
+
+</div>
+
+
+
+<div class="status-bar">
+
+
+<div>
+
+    État :
+
+    <span
+        id="status"
+        class="status-value offline"
+    >
+        Inactif
+    </span>
+
+</div>
+
+
+<div>
+
+    Modèle :
+
+    <span class="status-value">
+        YOLOv8
+    </span>
+
+</div>
+
+
+<div>
+
+    Source :
+
+    <span class="status-value">
+        Webcam
+    </span>
+
+</div>
+
+
+</div>
+
+
+
+<div class="info">
+
+<h3>
+    Fonctionnement
+</h3>
+
+<p>
+
+    Le module analyse chaque image de la caméra,
+    localise les objets reconnus par le modèle,
+    dessine une boîte englobante et affiche
+    automatiquement la classe prédite ainsi que
+    le niveau de confiance associé.
+
+</p>
+
+</div>
+
+
+</div>
+
+
+</main>
+
+
+
+<script>
+
+const BACKEND =
+    "http://127.0.0.1:8000";
+
+
+let running = false;
+
+
+function updateConfidence() {
+
+    const value =
+        document.getElementById(
+            "confidence"
+        ).value;
+
+    document.getElementById(
+        "confidenceText"
+    ).textContent =
+        value + " %";
+
+
+    /*
+       Si YOLO tourne déjà,
+       redémarrage avec le nouveau seuil.
+    */
+
+    if (running) {
+
+        startYOLO();
+
+    }
+
+}
+
+
+
+function startYOLO() {
+
+    const stream =
+        document.getElementById(
+            "yoloStream"
+        );
+
+    const placeholder =
+        document.getElementById(
+            "placeholder"
+        );
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+    const confidence =
+        document.getElementById(
+            "confidence"
+        ).value / 100;
+
+
+    /*
+       Timestamp pour empêcher le navigateur
+       d'utiliser un ancien flux en cache.
+    */
+
+    stream.src =
+        BACKEND
+        + "/api/yolo/stream"
+        + "?confidence="
+        + confidence
+        + "&t="
+        + Date.now();
+
+
+    stream.style.display =
+        "block";
+
+    placeholder.style.display =
+        "none";
+
+
+    status.textContent =
+        "YOLOv8 actif";
+
+    status.className =
+        "status-value online";
+
+
+    running = true;
+
+}
+
+
+
+function stopYOLO() {
+
+    const stream =
+        document.getElementById(
+            "yoloStream"
+        );
+
+    const placeholder =
+        document.getElementById(
+            "placeholder"
+        );
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    /*
+       Couper la connexion HTTP arrête
+       progressivement le générateur backend.
+    */
+
+    stream.src = "";
+
+
+    stream.style.display =
+        "none";
+
+    placeholder.style.display =
+        "block";
+
+
+    status.textContent =
+        "Inactif";
+
+    status.className =
+        "status-value offline";
+
+
+    running = false;
+
+}
+
+
+window.addEventListener(
+    "beforeunload",
+    stopYOLO
+);
+
+</script>
+
+
+</body>
+
+</html>
